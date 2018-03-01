@@ -1,1 +1,9 @@
-print('Hello')
+# SESSION 1, EXERCISES
+
+# EX.1
+
+# EX.2
+
+# EX.3
+
+# EX.4
