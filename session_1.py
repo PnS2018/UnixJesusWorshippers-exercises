@@ -24,3 +24,4 @@ funcOut2=1/(1+(1/K.exp(w[0]*x[0]+w[1]*x[1]+b)))
 multElements= K.function(inputs=(w, b, x), outputs=(funcOut2,))
 
 # EX.4
+
