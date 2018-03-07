@@ -40,12 +40,14 @@ n = 4 # arbitrary number
 x = K.placeholder(shape=(n, 1)) #x = np.ones(n)
 coeff = K.placeholder(shape=(n, 1))
 n_vec = np.arange(n)
-p = K.placeholder(shape=())
+p = K.placeholder(shape=(n, 1))
 
 monome_vec = np.power(x,n_vec)
 
-if coeff.shape == monome_vec.shape:
-    p = coeff * x
+#if coeff.shape == monome_vec.shape:
+#    p = coeff * x
+
+p = coeff *  monome_vec #why doesnt the element whise multiplication work out?
 
 grad_polynome = K.gradients(loss=p, variables=(monome_vec))
 grad_function = K.function(inputs=(coeff,x), outputs=(grad_polynome)) #why doesnt this work?
