@@ -37,7 +37,7 @@ multElements = K.function(inputs=(w, b, x), outputs=(funcOut2,))
 # EX.4
 
 n = 4 # arbitrary number
-x = np.ones(n)
+x = K.placeholder(shape=(n, 1)) #x = np.ones(n)
 coeff = K.placeholder(shape=(n, 1))
 n_vec = np.arange(n)
 p = K.placeholder(shape=())
@@ -47,8 +47,7 @@ monome_vec = np.power(x,n_vec)
 if coeff.shape == monome_vec.shape:
     p = coeff * x
 
-grad_polynome = K.gradients(loss=p, variables=(monome_vec,))
-grad_function = K.function(inputs=(coeff), outputs=(grad_polynome)) #why doesnt this work?
+grad_polynome = K.gradients(loss=p, variables=(monome_vec))
+grad_function = K.function(inputs=(coeff,x), outputs=(grad_polynome)) #why doesnt this work?
 
-
-print(grad_function(np.array([1,3,5,7])))
+print(grad_function(np.array([1,3,5,7]),np.array([3,3,3,3])))
