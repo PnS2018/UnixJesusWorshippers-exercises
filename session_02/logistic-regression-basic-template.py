@@ -9,8 +9,6 @@ import matplotlib.pyplot as plt
 
 from keras import backend as K
 
-from random import shuffle
-
 from pnslib import utils
 from pnslib import ml
 
@@ -21,17 +19,16 @@ from pnslib import ml
     class_list=[0, 1],
     flatten=True)
 
-print ("[MESSAGE] Dataset is loaded.")
-
+print("[MESSAGE] Dataset is loaded.")
 
 # preprocessing for training and testing images
-train_x = train_x.astype("float32")/255.  # rescale image
+train_x = train_x.astype("float32") / 255.  # rescale image
 mean_train_x = np.mean(train_x, axis=0)  # compute the mean across pixels
 train_x -= mean_train_x  # remove the mean pixel value from image
-test_x = test_x.astype("float32")/255.
+test_x = test_x.astype("float32") / 255.
 test_x -= mean_train_x
 
-print ("[MESSAGE] Dataset is preporcessed.")
+print("[MESSAGE] Dataset is preporcessed.")
 
 # Use PCA to reduce the dimension of the dataset,
 # so that the training will be less expensive
@@ -41,7 +38,7 @@ train_X, R, n_retained = ml.pca(train_x)
 # perform PCA on testing dataset
 test_X = ml.pca_fit(test_x, R, n_retained)
 
-print ("[MESSAGE] PCA is complete")
+print("[MESSAGE] PCA is complete")
 
 # sample sizes and feature dimensions
 num_train_samples = train_X.shape[0]
@@ -65,7 +62,7 @@ target_tensor = K.placeholder(shape=(batch_size, 1), dtype='float32')
 weight_variable = K.random_uniform_variable(shape=(input_dim, 1),
                                             low=-1., high=1.,
                                             dtype='float32')
-bias_variable = K.zeros(shape=(1, ), dtype='float32')
+bias_variable = K.zeros(shape=(1,), dtype='float32')
 
 # defining the sigmoid output tensor
 output_tensor = K.dot(input_tensor, weight_variable) + bias_variable
@@ -76,8 +73,8 @@ loss_tensor = K.mean(K.binary_crossentropy(target_tensor,
                                            output_tensor))
 
 # getting the gradients of the mean loss with respect to the weight and bias
-gradient_tensors = K.gradients(loss=loss_tensor, variables= [weight_variable,
-                                                             bias_variable])
+gradient_tensors = K.gradients(loss=loss_tensor, variables=[weight_variable,
+                                                            bias_variable])
 
 # creating the updates based on stochastic gradient descent rule
 updates = [(weight_variable, weight_variable - lr * gradient_tensors[0]),
@@ -100,17 +97,25 @@ accuracy_tensor = K.equal(prediction_tensor, target_tensor)
 test_function = K.function(inputs=(input_tensor, target_tensor),
                            outputs=(accuracy_tensor, prediction_tensor))
 
+
 # now you have to write a training loop which can loop over the data
 # 10 (num_epochs) times in batches of size 64 (batch_size) and update the
 # two variables in each batch in order to minimize the loss or cost function
 
-############ WRITE YOUR CODE HERE #################
+def batch_generator(shuff_test_X, shuff_test_y):
+    for index in xrange(0, shuff_test_X.shape[0], batch_size):
+        yield (shuff_test_X[index:index + batch_size], shuff_test_y[index:index + batch_size])
 
 
-
-
-
-############ YOUR CODE ABOVE THIS #################
+for epoch in xrange(num_epochs):
+    total_vector = np.concatenate((test_X, test_y[..., np.newaxis]), axis=1)
+    np.random.shuffle(total_vector)
+    shuff_test_X = total_vector[:, :-1]
+    shuff_test_y = total_vector[:, -1:]
+    for batch_X, batch_y in batch_generator(shuff_test_X, shuff_test_y):
+        if batch_X.shape[0] is not 64:
+            break
+        train_function((batch_X, batch_y))
 
 # visualize the ground truth and prediction
 # take first 64 examples in the testing dataset
@@ -127,9 +132,9 @@ labels = ["Tshirt/top", "Trouser"]
 plt.figure()
 for i in xrange(2):
     for j in xrange(5):
-        plt.subplot(2, 5, i*5+j+1)
-        plt.imshow(test_x[i*5+j].reshape(28, 28), cmap="gray")
+        plt.subplot(2, 5, i * 5 + j + 1)
+        plt.imshow(test_x[i * 5 + j].reshape(28, 28), cmap="gray")
         plt.title("Ground Truth: %s, \n Prediction %s" %
-                  (labels[ground_truths[i*5+j]],
-                   labels[preds[i*5+j]]))
+                  (labels[ground_truths[i * 5 + j]],
+                   labels[preds[i * 5 + j]]))
 plt.show()
