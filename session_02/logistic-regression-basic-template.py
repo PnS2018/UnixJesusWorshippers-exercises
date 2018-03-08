@@ -1,6 +1,6 @@
 """Logistic Regression for Fashion MNIST Binary Classification.
 
-Team #name
+Team UnixJesusWorshippers
 """
 from __future__ import print_function, absolute_import
 
