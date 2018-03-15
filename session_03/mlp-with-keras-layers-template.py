@@ -1,6 +1,6 @@
 """Multi-Layer Perceptron for Fashion MNIST Classification.
 
-Team #name
+Team #UnixJesusWorshippers
 """
 from __future__ import print_function, absolute_import
 
@@ -8,6 +8,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 from keras.layers import Input, Dense
+from keras.losses import categorical_crossentropy
 from keras.models import Model
 from keras.utils import to_categorical
 
@@ -22,16 +23,16 @@ from pnslib import ml
 
 num_classes = 10
 
-print ("[MESSAGE] Dataset is loaded.")
+print("[MESSAGE] Dataset is loaded.")
 
 # preprocessing for training and testing images
-train_x = train_x.astype("float32")/255.  # rescale image
+train_x = train_x.astype("float32") / 255.  # rescale image
 mean_train_x = np.mean(train_x, axis=0)  # compute the mean across pixels
 train_x -= mean_train_x  # remove the mean pixel value from image
-test_x = test_x.astype("float32")/255.
+test_x = test_x.astype("float32") / 255.
 test_x -= mean_train_x
 
-print ("[MESSAGE] Dataset is preprocessed.")
+print("[MESSAGE] Dataset is preprocessed.")
 
 # Use PCA to reduce the dimension of the dataset,
 # so that the training will be less expensive
@@ -41,7 +42,7 @@ train_X, R, n_retained = ml.pca(train_x)
 # perform PCA on testing dataset
 test_X = ml.pca_fit(test_x, R, n_retained)
 
-print ("[MESSAGE] PCA is complete.")
+print("[MESSAGE] PCA is complete.")
 
 # converting the input class labels to categorical labels for training
 train_Y = to_categorical(train_y, num_classes=num_classes)
@@ -52,8 +53,14 @@ print("[MESSAGE] Converted labels to categorical labels.")
 # define a model
 # >>>>> PUT YOUR CODE HERE <<<<<
 
+num_train_samples = train_X.shape[0]
+num_test_samples = test_X.shape[0]
 
-
+x = Input((train_X.shape[1],))  # input layer
+hl1 = Dense(100, activation="relu")(x)
+hl2 = Dense(100, activation="relu")(hl1)
+y = Dense(10, activation="softmax")(hl2)
+model = Model(x, y)
 
 print("[MESSAGE] Model is defined.")
 
@@ -66,16 +73,21 @@ model.summary()
 # see https://keras.io/losses/
 # >>>>> PUT YOUR CODE HERE <<<<<
 
+model.compile(loss="categorical_crossentropy",
+              optimizer="sgd",
+              metrics=[categorical_crossentropy])
 
-
-
-print ("[MESSAGE] Model is compiled.")
+print("[MESSAGE] Model is compiled.")
 
 # train the model with fit function
 # See https://keras.io/models/model/ for usage
 # >>>>> PUT YOUR CODE HERE <<<<<
 
-
+history = model.fit(
+    x=train_X, y=train_Y,                             #input , output layer
+    batch_size=64, epochs=10,
+    validation_data=(test_X, test_Y)
+)
 
 print("[MESSAGE] Model is trained.")
 
@@ -95,11 +107,11 @@ labels = ["Tshirt/top", "Trouser", "Pullover", "Dress", "Coat", "Sandal",
           "Shirt", "Sneaker", "Bag", "Ankle Boot"]
 
 plt.figure()
-for i in xrange(2):
-    for j in xrange(5):
-        plt.subplot(2, 5, i*5+j+1)
-        plt.imshow(test_x[i*5+j].reshape(28, 28), cmap="gray")
+for i in range(2):
+    for j in range(5):
+        plt.subplot(2, 5, i * 5 + j + 1)
+        plt.imshow(test_x[i * 5 + j].reshape(28, 28), cmap="gray")
         plt.title("Ground Truth: %s, \n Prediction %s" %
-                  (labels[ground_truths[i*5+j]],
-                   labels[preds[i*5+j]]))
+                  (labels[ground_truths[i * 5 + j]],
+                   labels[preds[i * 5 + j]]))
 plt.show()
