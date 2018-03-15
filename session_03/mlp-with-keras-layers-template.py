@@ -51,7 +51,6 @@ test_Y = to_categorical(test_y, num_classes=num_classes)
 print("[MESSAGE] Converted labels to categorical labels.")
 
 # define a model
-# >>>>> PUT YOUR CODE HERE <<<<<
 
 x = Input((train_X.shape[1],))
 h1 = Dense(100, activation="relu")(x)
@@ -68,8 +67,6 @@ model.summary()
 # and use SGD optimizer, you can try to use different
 # optimizers if you want
 # see https://keras.io/losses/
-
-# >>>>> PUT YOUR CODE HERE <<<<<
 
 model.compile(loss="categorical_crossentropy",
               optimizer="sgd",
