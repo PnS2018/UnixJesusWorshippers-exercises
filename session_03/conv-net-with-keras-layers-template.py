@@ -8,6 +8,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 from keras.layers import Input, Dense, Conv2D, MaxPooling2D, Flatten
+from keras.losses import categorical_crossentropy
 from keras.models import Model
 from keras.utils import to_categorical
 
@@ -40,10 +41,26 @@ test_Y = to_categorical(test_y, num_classes=num_classes)
 print("[MESSAGE] Converted labels to categorical labels.")
 
 # define a model
-x = Input((train_X.shape[1],))
-h1 = Dense(100, activation="relu")(x)
-h2 = Dense(100, activation="relu")(h1)
-y = Dense(10, activation="softmax")(h2)
+x = Input(shape=(train_x.shape[1], train_x.shape[2], train_x.shape[3],))  # heigth,width,no of chanels
+h1 = Conv2D(filters=20,
+            kernel_size=(7, 7),
+            strides=(2, 2),
+            padding="same",
+activation = "relu",)(x)
+h1_p = MaxPooling2D((2, 2))(h1)
+
+h2 = Conv2D(filters=25,
+            kernel_size=(5, 5),
+            strides=(2, 2),
+            padding="same",
+activation = "relu",)(h1_p)
+h2_p = MaxPooling2D((2,2))(h2)
+
+h2_f = Flatten()(h2_p)
+
+d = Dense(200, activation="relu")(h2_f)
+
+y = Dense(10, activation="softmax")(d)
 model = Model(x, y)
 
 print("[MESSAGE] Model is defined.")
@@ -66,14 +83,15 @@ print("[MESSAGE] Model is compiled.")
 # See https://keras.io/models/model/ for usage
 
 model.fit(
-    x=train_X, y=train_Y,
-    batch_size=64, epochs=10,
-    validation_data=(test_X, test_Y))
+     x=train_x, y=train_Y,
+     batch_size=64, epochs=10,
+     validation_data=(test_x, test_Y))
 
 print("[MESSAGE] Model is trained.")
 
 # save the trained model
 model.save("conv-net-fashion-mnist-trained.hdf5")
+#model.load_weights("conv-net-fashion-mnist-trained.hdf5")
 
 print("[MESSAGE] Model is saved.")
 
@@ -91,7 +109,7 @@ plt.figure()
 for i in range(2):
     for j in range(5):
         plt.subplot(2, 5, i * 5 + j + 1)
-        plt.imshow(test_x[i * 5 + j], cmap="gray")
+        plt.imshow(np.squeeze(test_x[i * 5 + j]), cmap="gray")
         plt.title("Ground Truth: %s, \n Prediction %s" %
                   (labels[ground_truths[i * 5 + j]],
                    labels[preds[i * 5 + j]]))
