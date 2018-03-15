@@ -8,6 +8,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 from keras.layers import Input, Dense, Conv2D, MaxPooling2D, Flatten
+from keras.losses import categorical_crossentropy
 from keras.models import Model
 from keras.utils import to_categorical
 
@@ -40,10 +41,20 @@ test_Y = to_categorical(test_y, num_classes=num_classes)
 print("[MESSAGE] Converted labels to categorical labels.")
 
 # define a model
-x = Input((train_X.shape[1],))
-h1 = Dense(100, activation="relu")(x)
-h2 = Dense(100, activation="relu")(h1)
-y = Dense(10, activation="softmax")(h2)
+x = Input((train_x.shape[1], train_x.shape[2], train_x.shape[3]))
+c1 = Conv2D(filters=20,
+            kernel_size=(7, 7),
+            padding="same",
+            activation="relu")(x)
+p1 = MaxPooling2D((2, 2))(c1)
+c2 = Conv2D(filters=25,
+            kernel_size=(5, 5),
+            padding="same",
+            activation="relu")(p1)
+p2 = MaxPooling2D((2, 2))(c2)
+f = Flatten()(p2)
+d = Dense(200, activation="relu")(f)
+y = Dense(10, activation="softmax")(d)
 model = Model(x, y)
 
 print("[MESSAGE] Model is defined.")
@@ -66,9 +77,9 @@ print("[MESSAGE] Model is compiled.")
 # See https://keras.io/models/model/ for usage
 
 model.fit(
-    x=train_X, y=train_Y,
+    x=train_x, y=train_Y,
     batch_size=64, epochs=10,
-    validation_data=(test_X, test_Y))
+    validation_data=(test_x, test_Y))
 
 print("[MESSAGE] Model is trained.")
 
