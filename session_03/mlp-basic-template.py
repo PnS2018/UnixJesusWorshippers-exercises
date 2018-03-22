@@ -1,6 +1,6 @@
 """Multi-Layer Perceptron for Fashion MNIST Classification.
 
-Team #name
+Team UnixJesusWorshippers
 """
 from __future__ import print_function, absolute_import
 
@@ -21,16 +21,16 @@ from pnslib import ml
 
 num_classes = 10
 
-print ("[MESSAGE] Dataset is loaded.")
+print("[MESSAGE] Dataset is loaded.")
 
 # preprocessing for training and testing images
-train_x = train_x.astype("float32")/255.  # rescale image
+train_x = train_x.astype("float32") / 255.  # rescale image
 mean_train_x = np.mean(train_x, axis=0)  # compute the mean across pixels
 train_x -= mean_train_x  # remove the mean pixel value from image
-test_x = test_x.astype("float32")/255.
+test_x = test_x.astype("float32") / 255.
 test_x -= mean_train_x
 
-print ("[MESSAGE] Dataset is preprocessed.")
+print("[MESSAGE] Dataset is preprocessed.")
 
 # Use PCA to reduce the dimension of the dataset,
 # so that the training will be less expensive
@@ -40,7 +40,7 @@ train_X, R, n_retained = ml.pca(train_x)
 # perform PCA on testing dataset
 test_X = ml.pca_fit(test_x, R, n_retained)
 
-print ("[MESSAGE] PCA is complete.")
+print("[MESSAGE] PCA is complete.")
 
 # converting the input class labels to categorical labels for training
 train_Y = to_categorical(train_y, num_classes=num_classes)
@@ -69,11 +69,68 @@ num_units = [100, 100]
 # the loss, while updating the necessary variables underneath
 # please provide the test_function which takes in the input and target , and
 # outputs a tuple of (accuracy, prediction)
-# >>>>> PUT YOUR CODE HERE <<<<<
 
+# defining the placeholders to feed the input and target data
+input_tensor = K.placeholder(shape=(batch_size, input_dim), dtype='float32')
+target_tensor = K.placeholder(shape=(batch_size, num_classes), dtype='float32')
 
+num_units.append(num_classes)
+weights = []
+biases = []
+inp_layer_dim = input_dim
 
+# defining the weight and the bias variables
+for layer in range(num_layers + 1):
+    outp_layer_dim = num_units[layer]
 
+    weight_variable = K.random_uniform_variable(shape=(inp_layer_dim, outp_layer_dim),
+                                                low=-1., high=1.,
+                                                dtype='float32')
+    bias_variable = K.zeros(shape=(outp_layer_dim,), dtype='float32')
+    weights.append(weight_variable)
+    biases.append(bias_variable)
+    inp_layer_dim = outp_layer_dim
+
+# defining the sigmoid output tensor
+
+inp = input_tensor
+
+for layer in range(num_layers + 1):
+    output_tensor = K.dot(inp, weights[0]) + biases[0]
+    if layer == num_layers + 1:
+        output_tensor = K.softmax(output_tensor)
+    else:
+        output_tensor = K.relu(output_tensor)
+    inp = output_tensor
+
+# defining the mean loss tensor
+loss_tensor = K.mean(K.categorical_crossentropy(target_tensor, output_tensor))
+
+# getting the gradients of the mean loss with respect to the weight and bias
+gradient_tensors = K.gradients(loss=loss_tensor, variables=weights + biases)
+
+# Here I stopped as I did not know how to go further...
+
+# # creating the updates based on stochastic gradient descent rule
+# updates = [(weight_variable, weight_variable - lr * gradient_tensors[0]),
+#            (bias_variable, bias_variable - lr * gradient_tensors[1])]
+
+# creating a training function which also updates the variables when the
+# function is called based on the lists of updates provided
+train_function = K.function(inputs=(input_tensor, target_tensor),
+                            outputs=(loss_tensor,),
+                            updates=updates)
+
+# for logistic regression, the prediction is 1 if greater than 0.5 and 0 if less
+prediction_tensor = K.cast(K.greater(output_tensor, 0.5), dtype='float32')
+
+# computing the accuracy based on how many prediction tensors equal the target
+# tensors
+accuracy_tensor = K.equal(prediction_tensor, target_tensor)
+
+# a test function to evaluate the performance of the model
+test_function = K.function(inputs=(input_tensor, target_tensor),
+                           outputs=(accuracy_tensor, prediction_tensor))
 
 # training loop here
 num_batches = num_train_samples // batch_size
@@ -126,9 +183,9 @@ labels = ["Tshirt/top", "Trouser", "Pullover", "Dress", "Coat", "Sandal",
 plt.figure()
 for i in xrange(2):
     for j in xrange(5):
-        plt.subplot(2, 5, i*5+j+1)
-        plt.imshow(test_x[i*5+j].reshape(28, 28), cmap="gray")
+        plt.subplot(2, 5, i * 5 + j + 1)
+        plt.imshow(test_x[i * 5 + j].reshape(28, 28), cmap="gray")
         plt.title("Ground Truth: %s, \n Prediction %s" %
-                  (labels[ground_truths[i*5+j]],
-                   labels[preds[i*5+j]]))
+                  (labels[ground_truths[i * 5 + j]],
+                   labels[preds[i * 5 + j]]))
 plt.show()

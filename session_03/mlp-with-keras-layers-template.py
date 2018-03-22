@@ -1,6 +1,6 @@
 """Multi-Layer Perceptron for Fashion MNIST Classification.
 
-Team #UnixJesusWorshippers
+Team UnixJesusWorshippers
 """
 from __future__ import print_function, absolute_import
 

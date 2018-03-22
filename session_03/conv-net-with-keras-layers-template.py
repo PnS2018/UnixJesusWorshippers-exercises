@@ -1,6 +1,6 @@
 """Convolutional Neural Network for Fashion MNIST Classification.
 
-Team #name
+Team UnixJesusWorshippers
 """
 from __future__ import print_function, absolute_import
 
@@ -41,23 +41,6 @@ test_Y = to_categorical(test_y, num_classes=num_classes)
 print("[MESSAGE] Converted labels to categorical labels.")
 
 # define a model
-
-# x = Input(shape=(train_x.shape[1], train_x.shape[2], train_x.shape[3],))  # heigth,width,no of chanels
-# h1 = Conv2D(filters=20,
-#            kernel_size=(7, 7),
-#            strides=(2, 2),
-#            padding="same",
-# activation = "relu",)(x)
-# h1_p = MaxPooling2D((2, 2))(h1)
-# h2 = Conv2D(filters=25,
-#            kernel_size=(5, 5),
-#            strides=(2, 2),
-#            padding="same",
-# activation = "relu",)(h1_p)
-# h2_p = MaxPooling2D((2,2))(h2)
-# h2_f = Flatten()(h2_p)
-# d = Dense(200, activation="relu")(h2_f)
-
 x = Input((train_x.shape[1], train_x.shape[2], train_x.shape[3]))
 c1 = Conv2D(filters=20,
             kernel_size=(7, 7),
@@ -71,7 +54,6 @@ c2 = Conv2D(filters=25,
 p2 = MaxPooling2D((2, 2))(c2)
 f = Flatten()(p2)
 d = Dense(200, activation="relu")(f)
-
 y = Dense(10, activation="softmax")(d)
 model = Model(x, y)
 
@@ -103,7 +85,7 @@ print("[MESSAGE] Model is trained.")
 
 # save the trained model
 model.save("conv-net-fashion-mnist-trained.hdf5")
-# model.load_weights("conv-net-fashion-mnist-trained.hdf5")
+#model.load_weights("conv-net-fashion-mnist-trained.hdf5")
 
 print("[MESSAGE] Model is saved.")
 
